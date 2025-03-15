@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8">
     <meta property="og:title"
-        content="Rethinking Token Reduction in MLLMs: Towards a Unified Paradigm for Training-Free Acceleration" />
+        content="Filter, Correlate, Compress: Training-Free Token Reduction for MLLM Acceleration" />
     <meta property="og:url" content="https://FiCoCo-accelerate.github.io/" />
     <meta property="og:image" content="static/images/head.png" />
     <meta property="og:image:width" content="2048" />
@@ -18,7 +18,7 @@
         function resizeFresh(){
             if(x!=window.innerWidth)
                 location.reload();
-        }
+        </b>
     </script>
     <link rel="icon" type="image/x-icon" href="static/images/4.png">
     <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro" rel="stylesheet">
@@ -59,11 +59,14 @@
                                 <a href="https://xuyang-liu16.github.io/" target="_blank">Xuyang
                                     Liu</a><sup>2,‡</sup>,</span>
                             <span class="author-block">
+                                <a href="" target="_blank">Zihan
+                                    Zhang</a><sup>3</sup>,</span>
+                            <span class="author-block">
                                 <a href="https://dingpx.github.io/" target="_blank">Pengxiang
-                                    Ding</a><sup>3</sup>,</span>
+                                    Ding</a><sup>4</sup>,</span>
                             <span class="author-block">
                                 <a href="https://milab.westlake.edu.cn/" target="_blank">Donglin
-                                    Wang</a><sup>3</sup>,</span>                                    
+                                    Wang</a><sup>4</sup>,</span>                                    
                             <span class="author-block">
                                 <a href="https://scholar.google.com/citations?user=qkpb0CMAAAAJ" target="_blank">
                                     Honggang
@@ -76,11 +79,11 @@
                             <span class="author-block">
                                 <a href="https://kyonhuang.top/" target="_blank">
                                     Siteng 
-                                    Huang</a><sup>4,*</sup></span>                  
+                                    Huang</a><sup>5,*</sup></span>                  
                         </div>
 
                         <div class="is-size-5 publication-authors">
-                            <span class="author-block"><sup>1</sup>Northwestern Polytechnical University</span>&nbsp;&nbsp;<span class="author-block"><sup>2</sup>Sichuan University</span>&nbsp;&nbsp;<span class="author-block"><sup>3</sup>Westlake University</span>&nbsp;&nbsp;<span class="author-block"><sup>4</sup>Zhejiang University</span>
+                            <span class="author-block"><sup>1</sup>Northwestern Polytechnical University</span>&nbsp;&nbsp;<span class="author-block"><sup>2</sup>Sichuan University</span>&nbsp;&nbsp;<span class="author-block"><sup>3</sup>Johns Hopkins University</span>&nbsp;&nbsp;<span class="author-block"><sup>4</sup>Westlake University</span>&nbsp;&nbsp;<span class="author-block"><sup>5</sup>Zhejiang University</span>
                             <span class="eql-cntrb"><small><br><sup>‡</sup>Equal contribution. <sup>*</sup>Corresponding author. </small></span>
                         </div>
 
@@ -157,11 +160,15 @@
                     <h2 class="title is-3">Abstract</h2>
                     <div class="content has-text-justified">
                         <p>
-                            To accelerate the inference of heavy Multimodal Large Language Models (MLLMs), this study rethinks the current landscape of training-free token reduction research.
-                            We regret to find that the critical components of existing methods are tightly intertwined, with their interconnections and effects remaining unclear for comparison, transfer, and expansion.
-                            Therefore, we propose a unified ''<b>fi</b>lter-<b>co</b>rrelate-<b>co</b>mpress'' paradigm that decomposes the token reduction into three distinct stages within a pipeline, maintaining consistent design objectives and elements while allowing for unique implementations.
-                            We additionally demystify the popular works and subsume them into our paradigm to showcase its universality. Finally, we offer a suite of methods grounded in the paradigm, striking a balance between speed and accuracy throughout different phases of the inference.
-                            Experimental results across 10 benchmarks indicate that our methods can achieve up to an 82.4% reduction in FLOPs with a minimal impact on performance, simultaneously surpassing state-of-the-art training-free methods.
+                            The quadratic complexity of Multimodal Large Language Models (MLLMs) with respect to sequence length poses significant computational and memory challenges, hindering their real-world deployment.
+                            While existing training-free token reduction methods aim to address these inefficiencies, how to precisely identify redundant visual tokens and recover the essential information from the discarded tokens remain unclear.
+                            In this paper, we propose a ''<b>fi</b>lter-<b>co</b>rrelate-<b>co</b>mpress'' framework that decomposes the token reduction into three stages: <b>filtering</b> redundant tokens, <b>correlating</b> discarded information to preserved tokens, and <b>compressing</b> tokens to minimize redundancy.
+                            % resolves critical "what-where-how" questions at each stage
+                            Following the framework, we propose a solution <b><b>FiCoCo</b> to identify limitations in single redundancy assessment, propose adaptive strategies to retain critical information from discarded tokens, and mitigate semantic dilution during token fusion.
+                            Two specialized variants, <b><b>FiCoCo-V</b> (for vision encoders) and <b><b>FiCoCo-L</b> (for LLM decoders), further optimize efficiency across MLLM architectures.
+                            Extensive experiments demonstrate that FiCoCo achieves up to <b>5.7x</b>/<b>14.7x</b> FLOPs reduction with <b>92.8%</b>/<b>93.6%</b> performance retention on LLaVA-1.5-7B/LLaVA-NeXT-7B. 
+                            % and scales to video tasks (<b>11.4x</b> FLOPs reduction, <b>92.8%</b> performance retention). 
+                            Our methods consistently outperform state-of-the-art training-free approaches, showcasing effectiveness and generalizability across model architectures, sizes, and tasks without requiring retraining.
                         </p>
                     </div>
                 </div>
@@ -174,73 +181,12 @@
         <div class="hero-body">
             <div class="container is-max-desktop">
                 <!-- <h2 class="title is-3">Samples generated by <i class="pixart-alpha-icon"></i><span style="color: rgb(72, 87, 220);">Ranni</span></h2> -->  <!-- not used before --> 
-                <h2 class="title is-3">A Unified Paradigm of Token Reduction</h2>
-                <p>
-                    We propose a unified ''<b>filter-correlate-compress</b>'' paradigm for training-free token reduction, which includes three stages, each stage responsible for addressing a question:
-                </p> 
-                <p>
-                (1) <b>Filter</b>: ''<i>What token should be discarded?</i>''
-                </p>
-                <p>
-                (2) <b>Correlate</b>: ''<i>Where should discarded information be preserved?</i>''
-                </p>
-                <p>
-                (3) <b>Compress</b>: ''<i>How to fuse the tokens to preserve information?</i>''
-                </p>   
-                <img loading="lazy" src="static/images/paradigm.png" alt="case" />    
-                <p>
-                Please refer to our paper to explore how this paradigm decomposes and formulates existing methods.
-                </p>       
-            </div>
-        </div>
-    </section>
-
-    <section class="hero is-small">
-        <div class="hero-body">
-            <div class="container is-max-desktop">
-                <!-- <h2 class="title is-3">Samples generated by <i class="pixart-alpha-icon"></i><span style="color: rgb(72, 87, 220);">Ranni</span></h2> -->  <!-- not used before --> 
-                <h2 class="title is-3">Empirical Equivalency of Paradigm</h2>
-                <p>
-                    The unified paradigm offers several distinct benefits:
-                </p> 
-                <p>
-                (1) <b>Decomposability</b>: The paradigm unfolds the entangled
-                token reduction into a structured pipeline with three key
-                stages, each with standardized input and output interfaces.
-                </p>
-                <p>
-                (2) <b>Understandability</b>: Each stage within the paradigm is
-                characterized by a well-defined design objective and clearly
-                specifies the intermediate elements to be implemented.
-                </p>
-                <p>
-                (3) <b>Flexibility</b>: The implementation of the intermediate elements is not restricted,
-                allowing the paradigm to accommodate existing methods and facilitate further expansion.
-                </p>
-                <p></p>
-                <p>
-                In the following table, we provide empirical evidence to
-                illustrate the equivalence between the original methods and
-                our deconstructed versions.
-                This indicates that our paradigm can
-                encompass existing token reduction methods effortlessly.
-                </p>
-                <img loading="lazy" src="static/images/empirical_equivalency.png" style="max-width: 400px;" alt="case" /> 
-            </div>
-        </div>
-    </section>
-
-    <section class="hero is-small">
-        <div class="hero-body">
-            <div class="container is-max-desktop">
-                <!-- <h2 class="title is-3">Samples generated by <i class="pixart-alpha-icon"></i><span style="color: rgb(72, 87, 220);">Ranni</span></h2> -->  <!-- not used before --> 
                 <h2 class="title is-3">Methodology: FiCoCo</h2>
                 <img loading="lazy" src="static/images/FiCoCo.png" alt="case" />   
                 <p>
                     Based on the paradigm, we develop a series of methods named <b>FiCoCo</b> that efficiently reduce the amount of visual token without re-training.
                     <b>FiCoCo-V</b> reduces tokens in the visual encoder,
-                    <b>FiCoCo-L</b> reduces tokens in the LLM decoder, 
-                    and <b>FiCoCo-VL</b> integrates their designs to reduce tokens in both phases, respectively.
+                    and <b>FiCoCo-L</b> reduces tokens in the LLM decoder.
                 </p>
                 <p></p>
                 <p>
@@ -257,9 +203,9 @@
                 <!-- <h2 class="title is-3">Samples generated by <i class="pixart-alpha-icon"></i><span style="color: rgb(72, 87, 220);">Ranni</span></h2> -->  <!-- not used before --> 
                 <h2 class="title is-3">Main Results</h2>
                 <p>
-                    Performance comparison on TextVQA benchmark:
+                    We illustate the average performance of three TFLOPs on six benchmarks, where our <b>FiCoCo-V</b> and <b>FiCoCo-L</b> are significantly superior to other methods, especially when reaching the lowest TFLOPs=1.5:
                 </p>
-                <img loading="lazy" src="static/images/FLOPs.png" alt="case" />     
+                <img loading="lazy" src="static/images/preformance-FLOPs.png" alt="case" />     
                 <p>
                 Please refer to our paper for detailed experimental results.
                 </p>                        
@@ -293,8 +239,8 @@
                         <p>
                             This page was built using the <a
                                 href="https://github.com/eliahuhorwitz/Academic-project-page-template"
-                                target="_blank">Academic Project Page Template</a> which was adopted from the <a
-                                href="https://nerfies.github.io" target="_blank">Nerfies</a> project page.
+                                target="_blank">Academic Project Page Template</a> which was adopted from the <a
+                                href="https://nerfies.github.io" target="_blank">Nerfies</a> project page.
                             You are free to borrow the of this website, we just ask that you link back to this page in
                             the footer. <br> This website is licensed under a <a rel="license"
                                 href="http://creativecommons.org/licenses/by-sa/4.0/" target="_blank">Creative
